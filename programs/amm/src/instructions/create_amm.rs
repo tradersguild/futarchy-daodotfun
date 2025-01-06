@@ -60,6 +60,9 @@ pub struct CreateAmm<'info> {
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token2022>,
     pub system_program: Program<'info, System>,
+    /// CHECK: Added by event-cpi
+    pub event_authority: UncheckedAccount<'info>,
+    pub program: Program<'info, crate::program::Amm>,
 }
 
 impl CreateAmm<'_> {

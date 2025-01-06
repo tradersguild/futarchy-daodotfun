@@ -17,11 +17,11 @@ pub struct AddLiquidityArgs {
     min_lp_tokens: u64,
 }
 
+#[event_cpi]
 #[derive(Accounts)]
 pub struct AddOrRemoveLiquidity<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-    #[account(mut)]
     pub amm: Account<'info, Amm>,
     #[account(mut)]
     pub lp_mint: Account<'info, Mint>,
@@ -36,6 +36,9 @@ pub struct AddOrRemoveLiquidity<'info> {
     #[account(mut)]
     pub vault_ata_quote: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token2022>,
+    /// CHECK: Added by event-cpi
+    pub event_authority: UncheckedAccount<'info>,
+    pub program: Program<'info, crate::program::Amm>,
 }
 
 impl AddOrRemoveLiquidity<'_> {
@@ -50,6 +53,8 @@ impl AddOrRemoveLiquidity<'_> {
             vault_ata_base,
             vault_ata_quote,
             token_program,
+            event_authority: _,
+            program: _,
         } = ctx.accounts;
 
         let AddLiquidityArgs {
