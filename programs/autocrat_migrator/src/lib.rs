@@ -4,6 +4,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program;
 use anchor_spl::token::{transfer, Token, TokenAccount, Transfer};
+use anchor_spl::token_2022::{self, Token2022};
 
 declare_id!("MigRDW6uxyNMDBD8fX2njCRyJC4YZk2Rx9pDUZiAESt");
 
@@ -12,7 +13,7 @@ pub mod autocrat_migrator {
     use super::*;
 
     pub fn multi_transfer2(ctx: Context<MultiTransfer2>) -> Result<()> {
-        transfer(
+        token_2022::transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
@@ -24,7 +25,7 @@ pub mod autocrat_migrator {
             ctx.accounts.from0.amount,
         )?;
 
-        transfer(
+        token_2022::transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
@@ -59,7 +60,7 @@ pub mod autocrat_migrator {
     }
 
     pub fn multi_transfer4(ctx: Context<MultiTransfer4>) -> Result<()> {
-        transfer(
+        token_2022::transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
@@ -71,7 +72,7 @@ pub mod autocrat_migrator {
             ctx.accounts.from0.amount,
         )?;
 
-        transfer(
+        token_2022::transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
@@ -83,7 +84,7 @@ pub mod autocrat_migrator {
             ctx.accounts.from1.amount,
         )?;
 
-        transfer(
+        token_2022::transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
@@ -95,7 +96,7 @@ pub mod autocrat_migrator {
             ctx.accounts.from2.amount,
         )?;
 
-        transfer(
+        token_2022::transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
@@ -132,7 +133,7 @@ pub mod autocrat_migrator {
 
 #[derive(Accounts)]
 pub struct MultiTransfer2<'info> {
-    token_program: Program<'info, Token>,
+    pub token_program: Program<'info, Token2022>,
     #[account(mut)]
     authority: Signer<'info>,
     #[account(mut)]
@@ -151,7 +152,7 @@ pub struct MultiTransfer2<'info> {
 
 #[derive(Accounts)]
 pub struct MultiTransfer4<'info> {
-    token_program: Program<'info, Token>,
+    token_program: Program<'info, Token2022>,
     #[account(mut)]
     authority: Signer<'info>,
     #[account(mut)]

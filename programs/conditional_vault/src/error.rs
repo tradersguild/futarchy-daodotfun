@@ -35,3 +35,13 @@ pub enum VaultError {
     #[msg("Conditional token metadata already set")]
     ConditionalTokenMetadataAlreadySet,
 }
+
+#[error_code]
+pub enum ConditionalVaultError {
+    #[msg("Token transfer fees not supported")]
+    TransferFeesNotSupported,
+    #[msg("Interest bearing tokens not supported")]
+    InterestBearingNotSupported,
+    #[msg("Invalid token program, expected Token-2022")]
+    InvalidTokenProgram,
+}

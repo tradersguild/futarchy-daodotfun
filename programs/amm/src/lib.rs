@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token_2022;
 
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;

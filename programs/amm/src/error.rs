@@ -38,4 +38,10 @@ pub enum AmmError {
     ConstantProductInvariantFailed,
     #[msg("Casting has caused an overflow")]
     CastingOverflow,
+    #[msg("Token transfer fees not supported")]
+    TransferFeesNotSupported,
+    #[msg("Interest bearing tokens not supported")]
+    InterestBearingNotSupported,
+    #[msg("Invalid token program, expected Token-2022")]
+    InvalidTokenProgram,
 }

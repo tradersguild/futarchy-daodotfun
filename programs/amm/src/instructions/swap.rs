@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, *};
+use anchor_spl::token_2022::{self, Token2022};
 
 use crate::error::AmmError;
 use crate::generate_amm_seeds;
@@ -45,7 +45,10 @@ pub struct Swap<'info> {
         associated_token::authority = amm,
     )]
     pub vault_ata_quote: Account<'info, TokenAccount>,
-    pub token_program: Program<'info, Token>,
+    pub token_program: Program<'info, Token2022>,
+    /// CHECK: Added by event-cpi
+    pub event_authority: UncheckedAccount<'info>,
+    pub program: Program<'info, crate::program::Amm>,
 }
 
 impl Swap<'_> {
@@ -69,6 +72,9 @@ impl Swap<'_> {
         } = args;
 
         let clock = Clock::get()?;
+
+        // Validate token program
+        amm.validate_token_program(&token_program.key())?;
 
         match swap_type {
             SwapType::Buy => require_gte!(
@@ -106,7 +112,7 @@ impl Swap<'_> {
             ),
         };
 
-        token::transfer(
+        token_2022::transfer(
             CpiContext::new(
                 token_program.to_account_info(),
                 Transfer {
@@ -118,7 +124,7 @@ impl Swap<'_> {
             input_amount,
         )?;
 
-        token::transfer(
+        token_2022::transfer(
             CpiContext::new_with_signer(
                 token_program.to_account_info(),
                 Transfer {

@@ -1,4 +1,5 @@
 use super::*;
+use anchor_spl::token_2022;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum VaultStatus {
@@ -54,6 +55,25 @@ impl ConditionalVault {
 
         require_gte!(vault_underlying_balance, max_possible_liability, VaultError::AssertFailed);
 
+        Ok(())
+    }
+
+    pub fn validate_token_program(&self, token_program: &Pubkey) -> Result<()> {
+        require_keys_eq!(
+            *token_program,
+            token_2022::ID,
+            ConditionalVaultError::InvalidTokenProgram
+        );
+        Ok(())
+    }
+
+    pub fn validate_token_extensions(&self, mint: &Account<Mint>) -> Result<()> {
+        if token_2022::has_transfer_fee(mint)? {
+            return Err(ConditionalVaultError::TransferFeesNotSupported.into());
+        }
+        if token_2022::is_interest_bearing(mint)? {
+            return Err(ConditionalVaultError::InterestBearingNotSupported.into());
+        }
         Ok(())
     }
 }

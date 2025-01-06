@@ -7,6 +7,7 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, Burn, Mint, MintTo, Token, TokenAccount, Transfer},
 };
+use anchor_spl::token_2022;
 
 pub mod error;
 pub mod instructions;

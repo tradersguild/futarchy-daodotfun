@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
+import { TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 
 export const AUTOCRAT_PROGRAM_ID = new PublicKey(
   "autowMzCbM29YXMgVG3T62Hkgo7RcyrvgQQkd54fDQL"
@@ -24,3 +25,10 @@ export const MAINNET_USDC = new PublicKey(
 export const USDC_DECIMALS = 6;
 
 export const AUTOCRAT_LUTS: PublicKey[] = [];
+
+export const TOKEN_PROGRAM_ID = TOKEN_2022_PROGRAM_ID;
+
+// Add new constants for Token-2022 specific features
+export const SUPPORTED_TOKEN_EXTENSIONS = [
+    // List supported Token-2022 extensions
+];

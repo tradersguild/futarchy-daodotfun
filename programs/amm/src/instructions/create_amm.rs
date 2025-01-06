@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::*;
+use anchor_spl::token_2022::{self, Token2022};
 
 use crate::error::AmmError;
 use crate::state::*;
@@ -58,7 +58,7 @@ pub struct CreateAmm<'info> {
     )]
     pub vault_ata_quote: Box<Account<'info, TokenAccount>>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    pub token_program: Program<'info, Token>,
+    pub token_program: Program<'info, Token2022>,
     pub system_program: Program<'info, System>,
 }
 
@@ -70,6 +70,14 @@ impl CreateAmm<'_> {
             AmmError::SameTokenMints
         );
 
+        self.amm.validate_token_program(&self.token_program.key())?;
+        self.validate_token_features()?;
+        Ok(())
+    }
+
+    fn validate_token_features(&self) -> Result<()> {
+        self.amm.validate_token_extensions(&self.base_mint)?;
+        self.amm.validate_token_extensions(&self.quote_mint)?;
         Ok(())
     }
 

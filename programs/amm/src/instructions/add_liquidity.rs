@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, *};
+use anchor_spl::token_2022::{self, Token2022};
 
 use crate::error::AmmError;
 use crate::AddOrRemoveLiquidity;
@@ -16,6 +17,27 @@ pub struct AddLiquidityArgs {
     min_lp_tokens: u64,
 }
 
+#[derive(Accounts)]
+pub struct AddOrRemoveLiquidity<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    #[account(mut)]
+    pub amm: Account<'info, Amm>,
+    #[account(mut)]
+    pub lp_mint: Account<'info, Mint>,
+    #[account(mut)]
+    pub user_lp_account: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub user_base_account: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub user_quote_account: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub vault_ata_base: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub vault_ata_quote: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token2022>,
+}
+
 impl AddOrRemoveLiquidity<'_> {
     pub fn handle_add(ctx: Context<Self>, args: AddLiquidityArgs) -> Result<()> {
         let AddOrRemoveLiquidity {
@@ -28,8 +50,6 @@ impl AddOrRemoveLiquidity<'_> {
             vault_ata_base,
             vault_ata_quote,
             token_program,
-            program: _,
-            event_authority: _,
         } = ctx.accounts;
 
         let AddLiquidityArgs {
@@ -104,7 +124,7 @@ impl AddOrRemoveLiquidity<'_> {
         let seeds = generate_amm_seeds!(amm);
         let signer = &[&seeds[..]];
 
-        token::mint_to(
+        token_2022::mint_to(
             CpiContext::new_with_signer(
                 token_program.to_account_info(),
                 MintTo {
@@ -121,7 +141,7 @@ impl AddOrRemoveLiquidity<'_> {
             (base_amount, user_base_account, vault_ata_base),
             (quote_amount, user_quote_account, vault_ata_quote),
         ] {
-            token::transfer(
+            token_2022::transfer(
                 CpiContext::new(
                     token_program.to_account_info(),
                     Transfer {

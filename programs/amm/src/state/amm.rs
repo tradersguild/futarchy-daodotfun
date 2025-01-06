@@ -1,9 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock::Slot;
+use anchor_spl::token_2022;
 
 use crate::error::AmmError;
 use crate::{MAX_PRICE, ONE_MINUTE_IN_SLOTS, PRICE_SCALE};
 use std::cmp::{max, min, Ordering};
+
+pub const TOKEN_2022_PROGRAM_ID: Pubkey = spl_token_2022::ID;
 
 #[derive(Clone, Copy, Debug, AnchorSerialize, AnchorDeserialize)]
 pub enum SwapType {
@@ -273,6 +276,25 @@ impl Amm {
         require!(oracle.last_price <= MAX_PRICE, AmmError::AssertFailed);
         require!(oracle.last_observation <= MAX_PRICE, AmmError::AssertFailed);
 
+        Ok(())
+    }
+
+    pub fn validate_token_program(&self, token_program: &Pubkey) -> Result<()> {
+        require_keys_eq!(
+            *token_program,
+            TOKEN_2022_PROGRAM_ID,
+            AmmError::InvalidTokenProgram
+        );
+        Ok(())
+    }
+
+    pub fn validate_token_extensions(&self, mint: &Account<Mint>) -> Result<()> {
+        if token_2022::has_transfer_fee(mint)? {
+            return Err(AmmError::TransferFeesNotSupported.into());
+        }
+        if token_2022::is_interest_bearing(mint)? {
+            return Err(AmmError::InterestBearingNotSupported.into());
+        }
         Ok(())
     }
 }

@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Burn, Transfer};
+use anchor_spl::token_2022::{self, Token2022};
 
 use crate::{error::AmmError, *};
 
@@ -10,6 +10,23 @@ pub struct RemoveLiquidityArgs {
     pub lp_tokens_to_burn: u64,
     pub min_quote_amount: u64,
     pub min_base_amount: u64,
+}
+
+#[event_cpi]
+#[derive(Accounts)]
+pub struct AddOrRemoveLiquidity<'info> {
+    pub user: Signer<'info>,
+    pub amm: Account<'info, Amm>,
+    pub lp_mint: Account<'info, Mint>,
+    pub user_lp_account: Account<'info, TokenAccount>,
+    pub user_base_account: Account<'info, TokenAccount>,
+    pub user_quote_account: Account<'info, TokenAccount>,
+    pub vault_ata_base: Account<'info, TokenAccount>,
+    pub vault_ata_quote: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token2022>,
+    /// CHECK: Added by event-cpi
+    pub event_authority: UncheckedAccount<'info>,
+    pub program: Program<'info, crate::program::Amm>,
 }
 
 impl AddOrRemoveLiquidity<'_> {
@@ -27,8 +44,8 @@ impl AddOrRemoveLiquidity<'_> {
             vault_ata_base,
             vault_ata_quote,
             token_program,
-            program: _,
             event_authority: _,
+            program: _,
         } = ctx.accounts;
 
         let RemoveLiquidityArgs {
@@ -67,7 +84,10 @@ impl AddOrRemoveLiquidity<'_> {
             AmmError::SwapSlippageExceeded
         );
 
-        token::burn(
+        // Add token program validation
+        ctx.accounts.amm.validate_token_program(&ctx.accounts.token_program.key())?;
+
+        token_2022::burn(
             CpiContext::new(
                 token_program.to_account_info(),
                 Burn {
@@ -88,7 +108,7 @@ impl AddOrRemoveLiquidity<'_> {
             (base_to_withdraw, vault_ata_base, user_base_account),
             (quote_to_withdraw, vault_ata_quote, user_quote_account),
         ] {
-            token::transfer(
+            token_2022::transfer(
                 CpiContext::new_with_signer(
                     token_program.to_account_info(),
                     Transfer {
